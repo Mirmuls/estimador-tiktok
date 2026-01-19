@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import questionsData from "./questions.json";
+import { getQuestions, type QuestionsData } from "./services/api";
 
 type TopicKey = string;
 
@@ -7,10 +7,6 @@ type Question = {
   question: string;
   answer: number;
   time?: number; // Tiempo en segundos (opcional, default 10)
-};
-
-type QuestionsData = {
-  [key: string]: Question[];
 };
 
 type GameStep = "topic" | "question" | "result";
@@ -36,66 +32,59 @@ const formatNumber = (value: number) =>
   new Intl.NumberFormat("es-AR").format(value);
 
 // Función para generar el label de una temática (capitalizar primera letra)
+// Obtiene el label desde la base de datos, si no existe capitaliza el nombre
 const getTopicLabel = (topic: string): string => {
-  // Si es una temática conocida, usar el label específico
-  const knownLabels: Record<string, string> = {
-    futbol: "Fútbol",
-    economia: "Economía",
-    geografia: "Geografía",
-    musica: "Música",
-  };
-  
-  if (knownLabels[topic]) {
-    return knownLabels[topic];
-  }
-  
-  // Si no es conocida, capitalizar primera letra
-  return topic.charAt(0).toUpperCase() + topic.slice(1);
+  // Capitalizar primera letra de cada palabra
+  return topic
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 };
 
 const DEFAULT_TIME = 10; // segundos por defecto
 
 export const Game: React.FC = () => {
-  // Cargar preguntas desde localStorage si existen, sino usar las del JSON
-  const [questionsDataState, setQuestionsDataState] = useState<QuestionsData>(questionsData);
+  // Cargar preguntas desde la API, con fallback a localStorage
+  const [questionsDataState, setQuestionsDataState] = useState<QuestionsData>({});
 
-  // Función para cargar preguntas desde localStorage
-  const loadQuestionsFromStorage = () => {
-    const stored = localStorage.getItem("questions");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setQuestionsDataState(parsed);
-      } catch (e) {
-        console.error("Error al cargar preguntas desde localStorage", e);
+  // Función para cargar preguntas desde la API
+  const loadQuestions = async () => {
+    try {
+      const data = await getQuestions();
+      setQuestionsDataState(data);
+      // Guardar en localStorage como backup
+      localStorage.setItem("questions", JSON.stringify(data));
+    } catch (error) {
+      console.error("Error al cargar preguntas:", error);
+      // Fallback a localStorage si existe
+      const stored = localStorage.getItem("questions");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setQuestionsDataState(parsed);
+        } catch (e) {
+          console.error("Error al cargar preguntas desde localStorage", e);
+          setQuestionsDataState({});
+        }
+      } else {
+        // Si no hay datos, usar objeto vacío
+        setQuestionsDataState({});
       }
-    } else {
-      setQuestionsDataState(questionsData);
     }
   };
 
   useEffect(() => {
     // Cargar al montar el componente
-    loadQuestionsFromStorage();
+    loadQuestions();
 
-    // Escuchar cambios en localStorage (cuando se carga un Excel desde otra pestaña)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "questions") {
-        loadQuestionsFromStorage();
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    // También escuchar cuando la página vuelve a tener foco (por si se cargó en la misma pestaña)
+    // También escuchar cuando la página vuelve a tener foco (para refrescar datos)
     const handleFocus = () => {
-      loadQuestionsFromStorage();
+      loadQuestions();
     };
 
     window.addEventListener("focus", handleFocus);
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("focus", handleFocus);
     };
   }, []);
