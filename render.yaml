@@ -1,0 +1,28 @@
+services:
+  # Backend API
+  - type: web
+    name: estimador-tiktok-api
+    env: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # PORT se asigna automáticamente por Render, no es necesario configurarlo
+      - key: MONGODB_URI
+        sync: false  # Configura esto manualmente en Render Dashboard con tu URI de MongoDB
+    healthCheckPath: /api/health
+
+  # Frontend
+  - type: web
+    name: estimador-tiktok-frontend
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npx serve -s dist -l $PORT
+    envVars:
+      - key: VITE_API_URL
+        sync: false  # Configura esto manualmente después de que el backend esté desplegado
+      - key: NODE_ENV
+        value: production
