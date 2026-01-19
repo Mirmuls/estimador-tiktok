@@ -117,10 +117,6 @@ export const Game: React.FC = () => {
     return list[index];
   }, [topic, currentIndex, questionsDataState]);
 
-  const currentQuestionTime = useMemo(() => {
-    return currentQuestion?.time || DEFAULT_TIME;
-  }, [currentQuestion]);
-
   // Manejo del timer con tiempo personalizado
   useEffect(() => {
     if (!isTimerRunning) return;
