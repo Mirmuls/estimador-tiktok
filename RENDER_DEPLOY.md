@@ -36,7 +36,10 @@ Asegúrate de que tu código esté en un repositorio Git y conectado a GitHub/Gi
 
 6. Click en "Create Web Service"
 7. Espera a que el build termine y el servicio esté en línea
-8. Anota la URL del servicio (ej: `https://estimador-tiktok-api.onrender.com`)
+8. **IMPORTANTE**: Anota la URL del servicio que Render te da
+   - La encontrarás en el Dashboard, en la parte superior del servicio
+   - Ejemplo: `https://estimador-tiktok-api.onrender.com`
+   - Esta URL la necesitarás para configurar `VITE_API_URL` en el frontend
 
 ### 3. Desplegar el Frontend
 
@@ -51,7 +54,10 @@ Asegúrate de que tu código esté en un repositorio Git y conectado a GitHub/Gi
 
 4. **Variables de Entorno**:
    - `NODE_ENV` = `production`
-   - `VITE_API_URL` = `https://estimador-tiktok-api.onrender.com/api` (usa la URL de tu backend)
+   - `VITE_API_URL` = `https://TU-BACKEND-URL.onrender.com/api`
+     - ⚠️ **IMPORTANTE**: Reemplaza `TU-BACKEND-URL` con la URL real que Render te dio cuando desplegaste el backend
+     - Ejemplo: Si tu backend es `https://estimador-tiktok-api.onrender.com`, entonces `VITE_API_URL` = `https://estimador-tiktok-api.onrender.com/api`
+     - Puedes encontrar la URL del backend en el Dashboard de Render, en la sección del servicio del backend
 
 5. Click en "Create Web Service"
 6. Espera a que el build termine
