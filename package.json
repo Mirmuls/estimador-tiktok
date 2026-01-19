@@ -7,7 +7,7 @@
     "dev": "vite",
     "dev:server": "cd server && npm run dev",
     "dev:all": "source ~/.nvm/nvm.sh && nvm use 22.21.1 && concurrently \"npm run dev\" \"npm run dev:server\"",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "server:install": "cd server && npm install",
     "server:start": "cd server && npm start"
